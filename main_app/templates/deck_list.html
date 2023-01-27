@@ -5,18 +5,34 @@
 
 {% block content %}
 
-<h1 class="title pt-5">My favorite cool decks</h1>
+<h1 class="title pt-5">{{header}}</h1>
+<form class="mb-5" method="get">
+  <div class="field has-addons">
+    <div class="control">
+      <!--  Our input will search by name of artist  -->
+      <input class="input" type="text" name="name" placeholder="name" />
+    </div>
+    <div class="control">
+      <input class="button is-success" type="submit" value="Search" style="background-color: crimson;"/>
+    </div>
+  </div>
+  <!--  This anchor tag will redirect back to artist list without a query param -->
+  <a class="button is-dark" href="{% url 'deck_list' %}">Clear Search</a>
+  <a class="button is-dark" href="{% url 'deck_create' %}">New deck</a>
+</form>
 <div class="gallery">
   {% for deck in decks %}
-  <a href="">
+  <a href="{% url 'deck_detail' deck.pk %}">
     <div class="card">
       <div class="card-image">
         <figure class="image is-square">
-          <img src="{{deck.image}}" alt="{{deck.commander}}" />
+          <img src="{{deck.img}}" alt="{{deck.name}}" />
         </figure>
       </div>
       <div class="card-header">
-        <p class="card-header-title">{{deck.commander}}</p>
+        <p class="card-header-title" style="background-color:azure">{{deck.name}}</p>
+        
+        
       </div>
     </div>
   </a>

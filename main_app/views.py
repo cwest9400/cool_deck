@@ -1,34 +1,14 @@
 from django.shortcuts import render
 from django.views.generic.base import TemplateView
+from django.views.generic.detail import DetailView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 # from django.views import View # <- View class to handle requests
 from django.http import HttpResponse # <- a class to handle sending a type of response
-
- #adds artist class for mock database data
-class Deck:
-    def __init__(self,commander, image, play_style, primer):
-        self.commander = commander
-        self.image = image
-        self.play_style = play_style
-        self.primer = primer
+from django.urls import reverse
+# import models
+from .models import Decks
 
 
-decks = [
-      Deck(
-        "Vaevitis Asmadi",
-        "https://cards.scryfall.io/art_crop/front/2/2/22ea73ec-1325-4437-a23f-dcda1767c713.jpg?1562858215",
-        "Johnny",
-        "This deck is built from premodern cards(1993-2003, pre-8th Edition). This deck makes the most of mana ramp and graveyard plays with big flashy creatures."),
-      Deck(
-        "Vaevitis Asmadi",
-        "https://cards.scryfall.io/art_crop/front/2/2/22ea73ec-1325-4437-a23f-dcda1767c713.jpg?1562858215",
-        "Johnny",
-        "This deck is built from premodern cards(1993-2003, pre-8th Edition). This deck makes the most of mana ramp and graveyard plays with big flashy creatures."),
-      Deck(
-        "Vaevitis Asmadi",
-        "https://cards.scryfall.io/art_crop/front/2/2/22ea73ec-1325-4437-a23f-dcda1767c713.jpg?1562858215",
-        "Johnny",
-        "This deck is built from premodern cards(1993-2003, pre-8th Edition). This deck makes the most of mana ramp and graveyard plays with big flashy creatures."),
-]
 # Create your views here.
 
 class Home(TemplateView):
@@ -42,5 +22,42 @@ class DeckList(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["decks"] = decks # this is the context key to use in views
+        #####Database connected
+        context["decks"] = Decks.objects.all()
+        name = self.request.GET.get("name")
+        # If a query exists we will filter by name 
+        if name != None:
+            # .filter is the sql WHERE statement and name__icontains is doing a search for any name that contains the query param
+            context["decks"] = Decks.objects.filter(name__icontains=name)
+            context["header"] = f"Searching for {name}"
+        
+        else:
+            context["decks"] = Decks.objects.all()
+            context["header"] = "Cool decks"
+
         return context
+
+class DeckCreate(CreateView):
+    model = Decks
+    fields = ['name', 'img', 'bio']
+    template_name = "deck_create.html"
+    def get_success_url(self):
+        return reverse('deck_detail', kwargs={'pk': self.object.pk})
+    # success_url = "/decks/"
+
+class DeckDetail(DetailView):
+    model = Decks
+    template_name = "deck_detail.html"
+
+class DeckUpdate(UpdateView):
+    model = Decks
+    fields = ['name', 'img', 'bio']
+    template_name = "deck_update.html"
+    success_url = "/decks/"
+    # def get_success_url(self):
+    #     return reverse('deck_detail', kwargs={'pk': self.object.pk})
+
+class DeckDelete(DeleteView):
+    model = Decks
+    template_name = "deck_delete_confirmation.html"
+    success_url = "/decks/"
